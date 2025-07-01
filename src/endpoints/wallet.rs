@@ -184,6 +184,13 @@ pub struct WithdrawHistoryResponse {
     pub complete_time: Option<String>,
 }
 
+impl WithdrawHistoryResponse {
+    pub fn is_complete(&self) -> bool {
+        self.complete_time.is_some() && self.status == 6
+    }
+}
+
+
 impl EndpointRequest for WithdrawHistoryRequest {
     type Response = Vec<WithdrawHistoryResponse>;
 }

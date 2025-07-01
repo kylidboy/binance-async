@@ -178,6 +178,20 @@ pub struct Balance {
     pub locked: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum OrderStatus {
+    New,
+    PendingNew,
+    PartiallyFilled,
+    Filled,
+    Canceled,
+    PendingCancel,
+    Rejected,
+    Expired,
+    ExpiredInMatch,
+}
+
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct Order {
@@ -190,7 +204,7 @@ pub struct Order {
     pub orig_qty: String,
     pub executed_qty: String,
     pub cummulative_quote_qty: String,
-    pub status: String,
+    pub status: OrderStatus,
     pub time_in_force: String,
     #[serde(rename = "type")]
     pub type_name: String,

@@ -15,6 +15,8 @@ pub enum SpotAccountEP {
     Account,
     #[strum(to_string = "/api/v3/myTrades")]
     TradeList,
+    #[strum(to_string = "/api/v3/order")]
+    QueryOrder,
 }
 
 impl Endpoint for SpotAccountEP {
@@ -22,6 +24,7 @@ impl Endpoint for SpotAccountEP {
         match self {
             SpotAccountEP::Account => (Method::GET, SecurityType::UserData, self.to_string()),
             SpotAccountEP::TradeList => (Method::GET, SecurityType::UserData, self.to_string()),
+            SpotAccountEP::QueryOrder => (Method::GET, SecurityType::UserData, self.to_string()),
         }
     }
 }
@@ -53,4 +56,17 @@ pub struct TradeListRequest {
 }
 impl EndpointRequest for TradeListRequest {
     type Response = Vec<TradeHistory>;
+}
+
+#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[serde(rename_all = "camelCase")]
+pub struct QueryOrderRequest {
+    pub symbol: String,
+    pub order_id: Option<u64>,
+    pub orig_client_order_id: Option<String>,
+    #[serde(flatten)]
+    pub base: BaseRequest,
+}
+impl EndpointRequest for QueryOrderRequest {
+    type Response = Order;
 }
