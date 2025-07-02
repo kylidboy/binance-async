@@ -146,13 +146,13 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn wallet_get_all_coins() {
+    async fn capital_config_get_all() {
         let apikey = envmnt::get_or_panic("TEST_APIKEY");
         let secret = envmnt::get_or_panic("TEST_SECRET");
         let client = client::Client::new(Some(apikey), Some(secret), &MAINNET.rest_api_endpoint);
         let req = wallet::AllCoinsRequest(BaseRequest::require());
         let resp = client
-            .access::<wallet::AllCoinsRequest>(&wallet::WalletEP::AllCoins, Some(req))
+            .access::<wallet::AllCoinsRequest>(&wallet::WalletEP::CapitalConfigGetAll, Some(req))
             .await
             .unwrap();
         println!("{:?}", resp);

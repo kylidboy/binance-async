@@ -13,7 +13,7 @@ pub enum WalletEP {
     #[strum(to_string = "/sapi/v1/system/status")]
     SystemStatus,
     #[strum(to_string = "/sapi/v1/capital/config/getall")]
-    AllCoins,
+    CapitalConfigGetAll,
     #[strum(to_string = "/sapi/v1/asset/assetDetail")]
     AssetDetail,
     #[strum(to_string = "/sapi/v1/capital/deposit/address")]
@@ -31,7 +31,7 @@ impl Endpoint for WalletEP {
     fn action_params(&self) -> (Method, SecurityType, String) {
         match self {
             WalletEP::SystemStatus => (Method::GET, SecurityType::None, self.to_string()),
-            WalletEP::AllCoins => (Method::GET, SecurityType::UserData, self.to_string()),
+            WalletEP::CapitalConfigGetAll => (Method::GET, SecurityType::UserData, self.to_string()),
             WalletEP::AssetDetail => (Method::GET, SecurityType::UserData, self.to_string()),
             WalletEP::DepositAddress => (Method::GET, SecurityType::UserData, self.to_string()),
             WalletEP::WithdrawApply => (Method::POST, SecurityType::UserData, self.to_string()),
