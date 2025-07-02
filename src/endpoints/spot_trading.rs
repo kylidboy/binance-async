@@ -62,7 +62,7 @@ pub struct NewOrderRequest {
     pub symbol: String,
     pub side: OrderSide,
     pub r#type: OrderType,
-    pub quantity: Option<String>,
+    pub quantity: Option<f64>,
     pub quote_order_qty: Option<f64>,
     pub price: Option<f64>,
     pub stop_price: Option<f64>,
