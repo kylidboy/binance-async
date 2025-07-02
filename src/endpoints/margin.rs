@@ -3,7 +3,7 @@ use crate::{
     endpoints::{BaseRequest, Endpoint, SecurityType},
     models::BnbBurnStatus,
 };
-use binance_cex_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
+use binance_api_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
 
 use serde::Serialize;
 use serde_qs::to_string;

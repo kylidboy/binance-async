@@ -3,7 +3,7 @@
 use super::{Endpoint, EndpointRequest, SecurityType};
 use crate::models::*;
 
-use binance_cex_macros::{APIRequestInit, APIEndPoint, APIRequestToString};
+use binance_api_macros::{APIRequestInit, APIEndPoint, APIRequestToString};
 use serde::Serialize;
 
 use super::BaseRequest;

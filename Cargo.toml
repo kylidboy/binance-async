@@ -28,7 +28,7 @@ auto_impl = "1.2.0"
 futures = "0.3.30"
 strum = { version = "0.26.2", features = ["derive", "strum_macros"] }
 strum_macros = "0.26.2"
-binance-cex-macros = { version = "0.1.0", path = "binance-cex-macros" }
+binance-api-macros = { version = "0.1.0", path = "binance-api-macros" }
 serde_qs = "0.13.0"
 http = "1.1.0"
 either = { version = "1.12.0", features = ["serde"] }

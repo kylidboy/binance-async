@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 
 use super::{BaseRequest, EndpointRequest};
 
-use binance_cex_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
+use binance_api_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
 
 #[derive(Debug, APIEndPoint)]
 pub enum WalletEP {

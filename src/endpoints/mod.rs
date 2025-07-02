@@ -8,7 +8,7 @@ pub mod spot_general;
 
 pub use http::Method;
 
-use binance_cex_macros::{APIRequestInit, APIRequestToString};
+use binance_api_macros::{APIRequestInit, APIRequestToString};
 use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 pub trait Endpoint {

@@ -9,7 +9,7 @@ use either::Either;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use binance_cex_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
+use binance_api_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
 
 
 #[derive(Debug, APIEndPoint)]

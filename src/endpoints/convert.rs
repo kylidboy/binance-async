@@ -4,7 +4,7 @@ use super::{BaseRequest, Endpoint, EndpointRequest, SecurityType};
 use crate::models::CoinFraction;
 use serde::Serialize;
 
-use binance_cex_macros::{APIEndPoint, APIRequestToString};
+use binance_api_macros::{APIEndPoint, APIRequestToString};
 
 #[derive(Debug, APIEndPoint)]
 pub enum ConvertEP {

@@ -3,7 +3,7 @@ use crate::endpoints::{
 };
 use crate::models::*;
 
-use binance_cex_macros::{APIRequestInit, APIRequestToString, APIEndPoint};
+use binance_api_macros::{APIRequestInit, APIRequestToString, APIEndPoint};
 
 use serde::{Deserialize, Serialize};
 

@@ -20,7 +20,7 @@ pub struct TradeListRequest {
 
     #[serde(flatten)]
     pub base: BaseRequest,
-}
+    }
 impl EndpointRequest for TradeListRequest {
     type Response = Vec<TradeHistory>;
 }
