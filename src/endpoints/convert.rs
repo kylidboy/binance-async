@@ -1,27 +1,18 @@
 #![allow(dead_code)]
 
-use super::{BaseRequest, Endpoint, EndpointRequest, Method, SecurityType};
+use super::{BaseRequest, Endpoint, EndpointRequest, SecurityType};
 use crate::models::CoinFraction;
 use serde::Serialize;
 
-use binance_cex_macros::ApiRequestToString;
-use strum_macros::Display;
+use binance_cex_macros::{APIEndPoint, APIRequestToString};
 
-#[derive(Debug, Display)]
+#[derive(Debug, APIEndPoint)]
 pub enum ConvertEP {
-    #[strum(to_string = "/sapi/v1/convert/assetInfo")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/convert/assetInfo")]
     AssetInfo,
 }
 
-impl Endpoint for ConvertEP {
-    fn action_params(&self) -> (Method, SecurityType, String) {
-        match self {
-            ConvertEP::AssetInfo => (Method::GET, SecurityType::None, self.to_string()),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestToString)]
 pub struct AssetInfoRequest(pub BaseRequest);
 impl EndpointRequest for AssetInfoRequest {
     type Response = Vec<CoinFraction>;

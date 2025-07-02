@@ -3,74 +3,39 @@
 use crate::models::*;
 
 use super::EndpointRequest;
-use super::{Endpoint, Method, OneOrMany, OneOrManySymbol, SecurityType};
+use super::{Endpoint, OneOrMany, OneOrManySymbol, SecurityType};
 
-use binance_cex_macros::ApiRequestToString;
 use either::Either;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use strum_macros::Display;
 
-use binance_cex_macros::ApiRequestRequire;
+use binance_cex_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
 
-#[derive(Debug, Display)]
+
+#[derive(Debug, APIEndPoint)]
 #[allow(dead_code)]
-pub enum MarketDataEP {
-    #[strum(to_string = "/api/v3/ping")]
-    Ping,
-    #[strum(to_string = "/api/v3/time")]
-    Time,
-    #[strum(to_string = "/api/v3/exchangeInfo")]
-    ExchangeInfo,
-    #[strum(to_string = "/api/v3/depth")]
+pub enum SpotMarketEP {
+    #[endpoint(GET, None, url = "/api/v3/depth")]
     OrderBook,
-    #[strum(to_string = "/api/v3/ticker/price")]
+    #[endpoint(GET, None, url = "/api/v3/ticker/price")]
     PriceTicker,
-    #[strum(to_string = "/api/v3/avgPrice")]
-    AvgPrice,
-    #[strum(to_string = "/api/v3/ticker/bookTicker")]
+    #[endpoint(GET, None, url = "/api/v3/avgPrice")]
+    CurrentAvgPrice,
+    #[endpoint(GET, None, url = "/api/v3/ticker/bookTicker")]
     SymbolOrderBookTicker,
-    #[strum(to_string = "/api/v3/ticker/24hr")]
+    #[endpoint(GET, None, url = "/api/v3/ticker/24hr")]
     Ticker24hr,
-    #[strum(to_string = "/api/v3/aggTrades")]
+    #[endpoint(GET, None, url = "/api/v3/aggTrades")]
     AggTrades,
-    #[strum(to_string = "/api/v3/klines")]
+    #[endpoint(GET, None, url = "/api/v3/klines")]
     Klines,
-    #[strum(to_string = "/api/v3/trades")]
+    #[endpoint(GET, None, url = "/api/v3/trades")]
     Trades,
-    #[strum(to_string = "/api/v3/historicalTrades")]
+    #[endpoint(GET, None, url = "/api/v3/historicalTrades")]
     HistoricalTrades,
 }
 
-impl Endpoint for MarketDataEP {
-    fn action_params(&self) -> (http::Method, super::SecurityType, String) {
-        match self {
-            MarketDataEP::Ping => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::Time => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::ExchangeInfo => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::OrderBook => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::PriceTicker => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::AvgPrice => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::SymbolOrderBookTicker => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::Ticker24hr => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::AggTrades => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::Klines => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::Trades => (Method::GET, SecurityType::None, self.to_string()),
-            MarketDataEP::HistoricalTrades => (Method::GET, SecurityType::None, self.to_string()),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
-pub struct ExchangeInfoRequest {
-    pub symbols: Option<OneOrManySymbol>,
-    pub permissions: Option<AccountAndSymbolPermission>,
-}
-impl EndpointRequest for ExchangeInfoRequest {
-    type Response = ExchangeInformation;
-}
-
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 pub struct OrderBookRequest {
     pub symbol: String,
     pub limit: Option<u64>,
@@ -79,13 +44,13 @@ impl EndpointRequest for OrderBookRequest {
     type Response = OrderBook;
 }
 
-#[derive(Debug, Serialize, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestToString)]
 pub struct PriceTickerRequest(pub Option<OneOrManySymbol>);
 impl EndpointRequest for PriceTickerRequest {
     type Response = OneOrMany<SymbolPrice>;
 }
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct AveragePriceRequest {
     pub symbol: String,
@@ -108,7 +73,7 @@ pub enum Ticker24hReqType {
 }
 pub type Ticker24hResponse = OneOrMany<Either<PriceStatsFull, PriceStatsMini>>;
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct KlinesRequest {
     symbol: String,
@@ -158,7 +123,7 @@ pub enum KlineInterval {
     _1M,
 }
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct AggTradesRequest {
     pub symbol: String,
@@ -171,7 +136,7 @@ impl EndpointRequest for AggTradesRequest {
     type Response = Vec<AggTrade>;
 }
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct AvgPriceRequest {
     pub symbol: String,

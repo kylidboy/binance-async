@@ -1,47 +1,20 @@
 use crate::endpoints::{
-    ApiRequestRequire, ApiRequestToString, Endpoint, EndpointRequest, Method, ResponseType, SecurityType,
+    Endpoint, EndpointRequest, ResponseType, SecurityType,
 };
 use crate::models::*;
 
-use serde::{Deserialize, Serialize};
-use strum_macros::Display;
+use binance_cex_macros::{APIRequestInit, APIRequestToString, APIEndPoint};
 
-#[derive(Debug, Display)]
+use serde::{Deserialize, Serialize};
+
+
+#[derive(Debug, APIEndPoint)]
 #[allow(dead_code)]
 pub enum SpotTradingEP {
-    #[strum(to_string = "/api/v3/order")]
+    #[endpoint(POST, Trade, url = "/api/v3/order")]
     Order,
-    #[strum(to_string = "/api/v3/order/test")]
+    #[endpoint(POST, Trade, url = "/api/v3/order/test")]
     OrderTest,
-    #[strum(to_string = "/api/v3/openOrders")]
-    OpenOrders,
-    #[strum(to_string = "/api/v3/allOrders")]
-    AllOrders,
-    #[strum(to_string = "/api/v3/order/oco")]
-    Oco,
-    #[strum(to_string = "/api/v3/orderList")]
-    OrderList,
-    #[strum(to_string = "/api/v3/allOrderList")]
-    AllOrderList,
-    #[strum(to_string = "/api/v3/openOrderList")]
-    OpenOrderList,
-    #[strum(to_string = "/api/v3/userDataStream")]
-    UserDataStream,
-}
-impl Endpoint for SpotTradingEP {
-    fn action_params(&self) -> (Method, SecurityType, String) {
-        match self {
-            SpotTradingEP::Order => (Method::POST, SecurityType::Trade, self.to_string()),
-            SpotTradingEP::OrderTest => todo!(),
-            SpotTradingEP::OpenOrders => todo!(),
-            SpotTradingEP::AllOrders => todo!(),
-            SpotTradingEP::Oco => todo!(),
-            SpotTradingEP::OrderList => todo!(),
-            SpotTradingEP::AllOrderList => todo!(),
-            SpotTradingEP::OpenOrderList => todo!(),
-            SpotTradingEP::UserDataStream => todo!(),
-        }
-    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -56,7 +29,7 @@ pub enum SelfTradePreventionMode {
     None,
 }
 
-#[derive(Debug, Serialize, Deserialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, Deserialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct NewOrderRequest {
     pub symbol: String,

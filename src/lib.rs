@@ -15,6 +15,8 @@ pub static MAINNET: api_config::ApiConfig = api_config::ApiConfig::default();
 #[dynamic]
 pub static TESTNET: api_config::ApiConfig = api_config::ApiConfig::testnet();
 
+pub use endpoints::SecurityType;
+
 #[cfg(test)]
 mod tests {
     use super::{MAINNET, TESTNET};
@@ -22,7 +24,7 @@ mod tests {
     use crate::{
         client,
         endpoints::{
-            convert, margin, market_data, spot_account, wallet, BaseRequest, OneOrManySymbol,
+            convert, margin, spot_market, spot_account, wallet, BaseRequest, OneOrManySymbol,
         },
         models::*,
         ws_streams::market_streams::{MarketStreams, PartialBookDepthLevel},
@@ -31,7 +33,7 @@ mod tests {
     #[tokio::test]
     async fn get_asset_info() {
         let client = client::Client::new(None, None, &MAINNET.rest_api_endpoint);
-        let req = convert::AssetInfoRequest(BaseRequest::require());
+        let req = convert::AssetInfoRequest(BaseRequest::init());
         let resp = client
             .access::<convert::AssetInfoRequest>(&convert::ConvertEP::AssetInfo, Some(req))
             .await;
@@ -41,10 +43,10 @@ mod tests {
     #[tokio::test]
     async fn market_data_order_book() {
         let client = client::Client::new(None, None, &MAINNET.rest_api_endpoint);
-        let req = market_data::OrderBookRequest::require("BTCUSDT".to_string());
+        let req = spot_market::OrderBookRequest::init("BTCUSDT".to_string());
         let resp = client
-            .access::<market_data::OrderBookRequest>(
-                &market_data::MarketDataEP::OrderBook,
+            .access::<spot_market::OrderBookRequest>(
+                &spot_market::SpotMarketEP::OrderBook,
                 Some(req),
             )
             .await;
@@ -54,13 +56,13 @@ mod tests {
     #[tokio::test]
     async fn market_data_price_ticker() {
         let client = client::Client::new(None, None, &MAINNET.rest_api_endpoint);
-        let req = market_data::PriceTickerRequest(Some(OneOrManySymbol::Many(vec![
+        let req = spot_market::PriceTickerRequest(Some(OneOrManySymbol::Many(vec![
             "ETHUSDT".to_string(),
             "BNBUSDT".to_string(),
         ])));
         let resp = client
-            .access::<market_data::PriceTickerRequest>(
-                &market_data::MarketDataEP::PriceTicker,
+            .access::<spot_market::PriceTickerRequest>(
+                &spot_market::SpotMarketEP::PriceTicker,
                 Some(req),
             )
             .await;
@@ -70,12 +72,12 @@ mod tests {
     #[tokio::test]
     async fn market_data_klines() {
         let client = client::Client::new(None, None, &MAINNET.rest_api_endpoint);
-        let req = market_data::KlinesRequest::require(
+        let req = spot_market::KlinesRequest::init(
             "BTCUSDT".to_string(),
-            market_data::KlineInterval::_1h,
+            spot_market::KlineInterval::_1h,
         );
         let resp = client
-            .access::<market_data::KlinesRequest>(&market_data::MarketDataEP::Klines, Some(req))
+            .access::<spot_market::KlinesRequest>(&spot_market::SpotMarketEP::Klines, Some(req))
             .await
             .unwrap();
         let resp: Vec<KlineSummary> = resp
@@ -88,10 +90,10 @@ mod tests {
     #[tokio::test]
     async fn market_data_agg_trades() {
         let client = client::Client::new(None, None, &MAINNET.rest_api_endpoint);
-        let req = market_data::AggTradesRequest::require("BTCUSDT".to_string());
+        let req = spot_market::AggTradesRequest::init("BTCUSDT".to_string());
         let resp = client
-            .access::<market_data::AggTradesRequest>(
-                &market_data::MarketDataEP::AggTrades,
+            .access::<spot_market::AggTradesRequest>(
+                &spot_market::SpotMarketEP::AggTrades,
                 Some(req),
             )
             .await
@@ -104,7 +106,7 @@ mod tests {
         let apikey = envmnt::get_or_panic("TEST_APIKEY");
         let secret = envmnt::get_or_panic("TEST_SECRET");
         let client = client::Client::new(Some(apikey), Some(secret), &MAINNET.rest_api_endpoint);
-        let mut req = spot_account::AccountRequest::require(BaseRequest::require());
+        let mut req = spot_account::AccountRequest::init(BaseRequest::init());
         req.omit_zero_balances = Some(true);
         let resp = client
             .access::<spot_account::AccountRequest>(
@@ -122,7 +124,7 @@ mod tests {
         let secret = envmnt::get_or_panic("TEST_SECRET");
         let client = client::Client::new(Some(apikey), Some(secret), &MAINNET.rest_api_endpoint);
         let req =
-            spot_account::TradeListRequest::require("BTCUSDT".to_string(), BaseRequest::require());
+            spot_account::TradeListRequest::init("BTCUSDT".to_string(), BaseRequest::init());
         let resp = client
             .access::<spot_account::TradeListRequest>(
                 &spot_account::SpotAccountEP::TradeList,
@@ -150,7 +152,7 @@ mod tests {
         let apikey = envmnt::get_or_panic("TEST_APIKEY");
         let secret = envmnt::get_or_panic("TEST_SECRET");
         let client = client::Client::new(Some(apikey), Some(secret), &MAINNET.rest_api_endpoint);
-        let req = wallet::AllCoinsRequest(BaseRequest::require());
+        let req = wallet::AllCoinsRequest(BaseRequest::init());
         let resp = client
             .access::<wallet::AllCoinsRequest>(&wallet::WalletEP::CapitalConfigGetAll, Some(req))
             .await
@@ -165,7 +167,7 @@ mod tests {
         let client = client::Client::new(Some(apikey), Some(secret), &MAINNET.rest_api_endpoint);
         let cross_margin_pairs = client.access::<margin::CrossMarginPairsRequest>(
             &margin::MarginEP::CrossMarginPairs,
-            Some(margin::CrossMarginPairsRequest::require()),
+            Some(margin::CrossMarginPairsRequest::init()),
         );
         let resp = cross_margin_pairs.await;
         println!("{:?}", resp);
@@ -179,8 +181,8 @@ mod tests {
         let resp = client
             .access::<margin::CrossMarginFeeDataRequest>(
                 &margin::MarginEP::CrossMarginFeeData,
-                Some(margin::CrossMarginFeeDataRequest::require(
-                    BaseRequest::require(),
+                Some(margin::CrossMarginFeeDataRequest::init(
+                    BaseRequest::init(),
                 )),
             )
             .await
@@ -196,7 +198,7 @@ mod tests {
         let resp = client
             .access::<margin::IsolatedMarginPairsRequest>(
                 &margin::MarginEP::IsolatedMarginPairs,
-                Some(margin::IsolatedMarginPairsRequest::require()),
+                Some(margin::IsolatedMarginPairsRequest::init()),
             )
             .await
             .unwrap();

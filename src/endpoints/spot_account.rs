@@ -1,35 +1,38 @@
 #![allow(dead_code)]
 
-use super::{ApiRequestRequire, Endpoint, EndpointRequest, Method, SecurityType};
+use super::{Endpoint, EndpointRequest, SecurityType};
 use crate::models::*;
 
-use binance_cex_macros::ApiRequestToString;
+use binance_cex_macros::{APIRequestInit, APIEndPoint, APIRequestToString};
 use serde::Serialize;
-use strum_macros::Display;
 
 use super::BaseRequest;
 
-#[derive(Debug, Display)]
+#[derive(Debug, APIEndPoint)]
 pub enum SpotAccountEP {
-    #[strum(to_string = "/api/v3/account")]
+    #[endpoint(GET, UserData, url = "/api/v3/account")]
     Account,
-    #[strum(to_string = "/api/v3/myTrades")]
+    #[endpoint(GET, UserData, url = "/api/v3/myTrades")]
     TradeList,
-    #[strum(to_string = "/api/v3/order")]
-    QueryOrder,
+    #[endpoint(GET, UserData, url = "/api/v3/order")]
+    Order,
+    #[endpoint(GET, UserData, url = "/api/v3/openOrders")]
+    OpenOrders,
+    #[endpoint(GET, UserData, url = "/api/v3/allOrders")]
+    AllOrders,
+    #[endpoint(GET, UserData, url = "/api/v3/orderList")]
+    OrderList,
+    #[endpoint(GET, UserData, url = "/api/v3/allOrderList")]
+    AllOrderList,
+    #[endpoint(GET, UserData, url = "/api/v3/openOrderList")]
+    OpenOrderList,
+
+    // deprecated
+    // #[endpoint(url = "/api/v3/userDataStream")]
+    // UserDataStream,
 }
 
-impl Endpoint for SpotAccountEP {
-    fn action_params(&self) -> (http::Method, super::SecurityType, String) {
-        match self {
-            SpotAccountEP::Account => (Method::GET, SecurityType::UserData, self.to_string()),
-            SpotAccountEP::TradeList => (Method::GET, SecurityType::UserData, self.to_string()),
-            SpotAccountEP::QueryOrder => (Method::GET, SecurityType::UserData, self.to_string()),
-        }
-    }
-}
-
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct AccountRequest {
     pub omit_zero_balances: Option<bool>,
@@ -41,7 +44,7 @@ impl EndpointRequest for AccountRequest {
     type Response = AccountInformation;
 }
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct TradeListRequest {
     pub symbol: String,
@@ -58,7 +61,7 @@ impl EndpointRequest for TradeListRequest {
     type Response = Vec<TradeHistory>;
 }
 
-#[derive(Debug, Serialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct QueryOrderRequest {
     pub symbol: String,

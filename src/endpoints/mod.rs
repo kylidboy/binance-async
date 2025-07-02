@@ -1,13 +1,14 @@
 pub mod convert;
 pub mod margin;
-pub mod market_data;
+pub mod spot_market;
 pub mod spot_account;
 pub mod spot_trading;
 pub mod wallet;
+pub mod spot_general;
 
 pub use http::Method;
 
-use binance_cex_macros::{ApiRequestRequire, ApiRequestToString};
+use binance_cex_macros::{APIRequestInit, APIRequestToString};
 use serde::{ser::SerializeStruct, Deserialize, Serialize};
 
 pub trait Endpoint {
@@ -76,7 +77,7 @@ impl Serialize for OneOrManySymbol {
     }
 }
 
-#[derive(Debug, Serialize, Default, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, Default, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct BaseRequest {
     recv_window: Option<u64>,
@@ -116,7 +117,7 @@ mod tests {
 
     #[test]
     fn create_base_request() {
-        let mut req = BaseRequest::require();
+        let mut req = BaseRequest::init();
         req.recv_window = Some(30);
         println!("{:?}", req);
     }

@@ -1,47 +1,33 @@
 #![allow(dead_code)]
 
-use crate::endpoints::{ApiRequestRequire, ApiRequestToString, Endpoint, Method, SecurityType};
+use crate::endpoints::{Endpoint, SecurityType};
 use crate::models::CoinInfo;
 
 use serde::{Deserialize, Serialize};
-use strum_macros::Display;
 
 use super::{BaseRequest, EndpointRequest};
 
-#[derive(Debug, Display)]
+use binance_cex_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
+
+#[derive(Debug, APIEndPoint)]
 pub enum WalletEP {
-    #[strum(to_string = "/sapi/v1/system/status")]
+    #[endpoint(GET, None, url = "/sapi/v1/system/status")]
     SystemStatus,
-    #[strum(to_string = "/sapi/v1/capital/config/getall")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/capital/config/getall")]
     CapitalConfigGetAll,
-    #[strum(to_string = "/sapi/v1/asset/assetDetail")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/asset/assetDetail")]
     AssetDetail,
-    #[strum(to_string = "/sapi/v1/capital/deposit/address")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/capital/deposit/address")]
     DepositAddress,
-    // #[strum(to_string = "/sapi/v1/futures/transfer")]
-    // SpotFuturesTransfer,
-    #[strum(to_string = "/sapi/v1/capital/withdraw/apply")]
+    #[endpoint(POST, UserData, url = "/sapi/v1/capital/withdraw/apply")]
     WithdrawApply,
-    #[strum(to_string = "/sapi/v1/capital/deposit/hisrec")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/capital/deposit/hisrec")]
     DepositHisrec,
-    #[strum(to_string = "/sapi/v1/capital/withdraw/history")]
+    #[endpoint(GET, UserData, url = "/sapi/v1/capital/withdraw/history")]
     WithdrawHistory,
 }
-impl Endpoint for WalletEP {
-    fn action_params(&self) -> (Method, SecurityType, String) {
-        match self {
-            WalletEP::SystemStatus => (Method::GET, SecurityType::None, self.to_string()),
-            WalletEP::CapitalConfigGetAll => (Method::GET, SecurityType::UserData, self.to_string()),
-            WalletEP::AssetDetail => (Method::GET, SecurityType::UserData, self.to_string()),
-            WalletEP::DepositAddress => (Method::GET, SecurityType::UserData, self.to_string()),
-            WalletEP::WithdrawApply => (Method::POST, SecurityType::UserData, self.to_string()),
-            WalletEP::DepositHisrec => (Method::GET, SecurityType::UserData, self.to_string()),
-            WalletEP::WithdrawHistory => (Method::GET, SecurityType::UserData, self.to_string()),
-        }
-    }
-}
 
-#[derive(Debug, Serialize, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestToString)]
 pub struct SystemStatusRequest;
 impl EndpointRequest for SystemStatusRequest {
     type Response = SystemStatusResponse;
@@ -52,7 +38,7 @@ pub struct SystemStatusResponse {
     pub msg: String,
 }
 
-#[derive(Debug, Serialize, ApiRequestToString)]
+#[derive(Debug, Serialize, APIRequestToString)]
 pub struct AllCoinsRequest(pub BaseRequest);
 impl EndpointRequest for AllCoinsRequest {
     type Response = Vec<CoinInfo>;
@@ -83,7 +69,7 @@ impl EndpointRequest for AllCoinsRequest {
 //     }
 // }
 
-#[derive(Debug, Serialize, Deserialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, Deserialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct WithdrawRequest {
     pub coin: String,
@@ -109,7 +95,7 @@ impl EndpointRequest for WithdrawRequest {
     type Response = WithdrawResponse;
 }
 
-#[derive(Debug, Serialize, Deserialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, Deserialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct DepositHisrecRequest {
     pub include_source: Option<bool>,
@@ -146,7 +132,7 @@ impl EndpointRequest for DepositHisrecRequest {
     type Response = Vec<DepositHisrecResponse>;
 }
 
-#[derive(Debug, Serialize, Deserialize, ApiRequestRequire, ApiRequestToString)]
+#[derive(Debug, Serialize, Deserialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct WithdrawHistoryRequest {
     pub coin: Option<String>,
@@ -189,7 +175,6 @@ impl WithdrawHistoryResponse {
         self.complete_time.is_some() && self.status == 6
     }
 }
-
 
 impl EndpointRequest for WithdrawHistoryRequest {
     type Response = Vec<WithdrawHistoryResponse>;
