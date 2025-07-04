@@ -17,8 +17,8 @@ pub enum FuturesTradingEP {
     OrderTest,
     #[endpoint(POST, Trade, url = "/fapi/v1/leverage")]
     Leverage,
-    // #[endpoint(GET, UserData)]
-    // OpenOrder,
+    #[endpoint(GET, UserData, url = "/fapi/v3/positionRisk")]
+    PositionRiskV3,
 }
 
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
@@ -73,7 +73,7 @@ pub struct NewOrderRequest {
 // "priceMatch": "NONE",              //price match mode
 // "selfTradePreventionMode": "NONE", //self trading preventation mode
 // "goodTillDate": 1693207680000      //order pre-set auot cancel time for TIF GTD order
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct NewOrderResponse {
     pub client_order_id: String,
@@ -143,7 +143,7 @@ impl EndpointRequest for NewOrderRequest {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum PositionSide {
     Both,
@@ -160,7 +160,7 @@ STOP/TAKE_PROFIT	quantity, price, stopPrice
 STOP_MARKET/TAKE_PROFIT_MARKET	stopPrice
 TRAILING_STOP_MARKET	callbackRate
  */
-#[derive(Debug, Display, Serialize, Deserialize)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum FutureOrderType {
     Limit,
@@ -177,7 +177,7 @@ pub enum FutureOrderType {
 }
 
 #[allow(clippy::all)]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TimeInForce {
     Gtc,
@@ -187,7 +187,7 @@ pub enum TimeInForce {
     Gtx,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 pub enum WorkingType {
     #[serde(rename = "MARK_PRICE")]
     MarkPrice,
@@ -195,7 +195,7 @@ pub enum WorkingType {
     ContractPrice,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum ResponseType {
     Ack,
@@ -216,7 +216,7 @@ QUEUE_10 (the 10th best price on the same side of the order book)
 QUEUE_20 (the 20th best price on the same side of the order book)
  */
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum PriceMatch {
     None,
@@ -236,7 +236,7 @@ pub enum PriceMatch {
     Queue20,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
 pub enum SelfTradePreventionMode {
     #[serde(rename = "EXPIRE_TAKER")]
     ExpireTaker,
@@ -255,7 +255,7 @@ pub struct LeverageRequest {
     pub base: BaseRequest,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct LeverageResponse {
     pub leverage: i32,
@@ -266,3 +266,64 @@ pub struct LeverageResponse {
 impl EndpointRequest for LeverageRequest {
     type Response = LeverageResponse;
 }
+
+
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionRiskV3Request {
+    pub symbol: Option<String>,
+    #[serde(flatten)]
+    pub base: BaseRequest,
+}
+
+impl EndpointRequest for PositionRiskV3Request {
+    type Response = Vec<PositionRiskV3>;
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+#[serde(rename_all = "camelCase")]
+pub struct PositionRiskV3 {
+    pub symbol: String,
+    pub position_side: String,
+    pub position_amt: String,
+    pub entry_price: String,
+    pub break_even_price: String,
+    pub mark_price: String,
+    pub un_realized_profit: String,
+    pub liquidation_price: String,
+    pub isolated_margin: String,
+    pub notional: String,
+    pub margin_asset: String,
+    pub isolated_wallet: String,
+    pub initial_margin: String,
+    pub maint_margin: String,
+    pub position_initial_margin: String,
+    pub open_order_initial_margin: String,
+    pub adl: i32,
+    pub bid_notional: String,
+    pub ask_notional: String,
+    pub update_time: u64,
+}
+
+/*
+ * "symbol": "ADAUSDT",
+        "positionSide": "BOTH",               // 持仓方向
+        "positionAmt": "30",
+        "entryPrice": "0.385",
+        "breakEvenPrice": "0.385077",
+        "markPrice": "0.41047590",
+        "unRealizedProfit": "0.76427700",     // 持仓未实现盈亏
+        "liquidationPrice": "0",
+        "isolatedMargin": "0",
+        "notional": "12.31427700",
+        "marginAsset": "USDT",
+        "isolatedWallet": "0",
+        "initialMargin": "0.61571385",        // 初始保证金
+        "maintMargin": "0.08004280",          // 维持保证金
+        "positionInitialMargin": "0.61571385",// 仓位初始保证金
+        "openOrderInitialMargin": "0",        // 订单初始保证金
+        "adl": 2,
+        "bidNotional": "0",
+        "askNotional": "0",
+        "updateTime": 1720736417660           // 更新时间
+ */
