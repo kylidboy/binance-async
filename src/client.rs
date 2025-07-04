@@ -275,7 +275,7 @@ impl Client {
 
                 signed_key.update(req.as_bytes());
                 let signature = hex_encode(signed_key.finalize().into_bytes());
-                format!("signature={}&{}", signature, req)
+                format!("{req}&signature={signature}")
             },
         )
     }
