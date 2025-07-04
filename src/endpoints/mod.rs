@@ -5,11 +5,14 @@ pub mod spot_account;
 pub mod spot_trading;
 pub mod wallet;
 pub mod spot_general;
+pub mod public_enums;
+pub mod futures_trading;
 
 pub use http::Method;
 
 use binance_api_macros::{APIRequestInit, APIRequestToString};
 use serde::{ser::SerializeStruct, Deserialize, Serialize};
+use anyhow::Result;
 
 pub trait Endpoint {
     fn action_params(&self) -> (Method, SecurityType, String);
@@ -17,6 +20,10 @@ pub trait Endpoint {
 
 pub trait EndpointRequest: ToString {
     type Response: for<'de> Deserialize<'de>;
+
+    fn validate(&self) -> Result<()> {
+        Ok(())
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize)]

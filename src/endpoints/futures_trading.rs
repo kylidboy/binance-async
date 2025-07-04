@@ -1,0 +1,237 @@
+use crate::{
+    endpoints::{public_enums::*, BaseRequest, Endpoint, EndpointRequest, SecurityType},
+    models::*,
+};
+
+use binance_api_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
+
+use serde::{Deserialize, Serialize};
+use strum::Display;
+
+#[derive(Debug, APIEndPoint)]
+#[allow(dead_code)]
+pub enum FuturesTradingEP {
+    #[endpoint(POST, Trade, url = "/fapi/v1/order")]
+    Order,
+}
+
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
+#[serde(rename_all = "camelCase")]
+pub struct NewOrderRequest {
+    pub symbol: String,
+    pub side: OrderSide,
+    pub position_side: Option<PositionSide>,
+    pub r#type: FutureOrderType,
+    pub time_in_force: Option<TimeInForce>,
+    pub quantity: Option<f64>,
+    pub reduce_only: Option<bool>,
+    pub price: Option<f64>,
+    pub new_client_order_id: Option<String>,
+    pub stop_price: Option<f64>,
+    pub close_position: Option<String>,
+    pub activation_price: Option<f64>,
+    pub callback_rate: Option<f64>,
+    pub working_type: Option<WorkingType>,
+    pub price_protect: Option<String>,
+    pub new_order_resp_type: Option<ResponseType>,
+    pub price_match: Option<PriceMatch>,
+    pub self_trade_prevention_mode: Option<SelfTradePreventionMode>,
+    pub good_till_date: Option<u64>,
+    #[serde(flatten)]
+    pub base: BaseRequest,
+}
+
+// "clientOrderId": "testOrder",
+// "cumQty": "0",
+// "cumQuote": "0",
+// "executedQty": "0",
+// "orderId": 22542179,
+// "avgPrice": "0.00000",
+// "origQty": "10",
+// "price": "0",
+// "reduceOnly": false,
+// "side": "BUY",
+// "positionSide": "SHORT",
+// "status": "NEW",
+// "stopPrice": "9300",		// please ignore when order type is TRAILING_STOP_MARKET
+// "closePosition": false,   // if Close-All
+// "symbol": "BTCUSDT",
+// "timeInForce": "GTD",
+// "type": "TRAILING_STOP_MARKET",
+// "origType": "TRAILING_STOP_MARKET",
+// "activatePrice": "9020",	// activation price, only return with TRAILING_STOP_MARKET order
+// "priceRate": "0.3",			// callback rate, only return with TRAILING_STOP_MARKET order
+// "updateTime": 1566818724722,
+// "workingType": "CONTRACT_PRICE",
+// "priceProtect": false,      // if conditional order trigger is protected
+// "priceMatch": "NONE",              //price match mode
+// "selfTradePreventionMode": "NONE", //self trading preventation mode
+// "goodTillDate": 1693207680000      //order pre-set auot cancel time for TIF GTD order
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct NewOrderResponse {
+    pub client_order_id: String,
+    pub cum_qty: String,
+    pub cum_quote: String,
+    pub execute_qty: String,
+    pub order_id: u64,
+    pub avg_price: String,
+    pub orig_qty: String,
+    pub price: String,
+    pub reduce_only: bool,
+    pub side: String,
+    pub position_side: String,
+    pub status: String,
+    pub stop_price: String,
+    pub close_position: bool,
+    pub symbol: String,
+    pub time_in_force: String,
+    pub r#type: String,
+    pub orig_type: String,
+    pub activate_price: String,
+    pub update_time: u64,
+    pub working_type: String,
+    pub price_protect: bool,
+    pub price_match: String,
+    pub self_trade_prevention_mode: String,
+    pub good_till_date: u64,
+}
+
+impl EndpointRequest for NewOrderRequest {
+    type Response = NewOrderResponse;
+
+    fn validate(&self) -> anyhow::Result<()> {
+        match &self.r#type {
+            t @ FutureOrderType::Limit => {
+                if self.quantity.is_none() || self.time_in_force.is_none() || self.price.is_none() {
+                    anyhow::bail!("order type {t} requirements")
+                }
+            }
+            t @ FutureOrderType::Market => {
+                if self.quantity.is_none() {
+                    anyhow::bail!("order type {t} requirements")
+                }
+            }
+            t @ FutureOrderType::Stop | t @ FutureOrderType::TakeProfit => {
+                if self.quantity.is_none() || self.stop_price.is_none() || self.price.is_none() {
+                    anyhow::bail!("order type {t} requirements")
+                }
+            }
+            t @ FutureOrderType::StopMarket | t @ FutureOrderType::TakeProfitMarket => {
+                if self.stop_price.is_none() {
+                    anyhow::bail!("order type {t} requirements")
+                }
+            }
+            t @ FutureOrderType::TrailingStopMarket => {
+                if self.callback_rate.is_none() {
+                    anyhow::bail!("order type {t} requirements")
+                }
+            }
+        }
+
+        Ok(())
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum PositionSide {
+    Both,
+    Long,
+    Short,
+}
+
+/*
+ *
+Type	Additional mandatory parameters
+LIMIT	timeInForce, quantity, price
+MARKET	quantity
+STOP/TAKE_PROFIT	quantity, price, stopPrice
+STOP_MARKET/TAKE_PROFIT_MARKET	stopPrice
+TRAILING_STOP_MARKET	callbackRate
+ */
+#[derive(Debug, Display, Serialize, Deserialize)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum FutureOrderType {
+    Limit,
+    Market,
+    Stop,
+    #[serde(rename = "TAKE_PROFIT")]
+    TakeProfit,
+    #[serde(rename = "STOP_MARKET")]
+    StopMarket,
+    #[serde(rename = "TAKE_PROFIT_MARKET")]
+    TakeProfitMarket,
+    #[serde(rename = "TRAILING_STOP_MARKET")]
+    TrailingStopMarket,
+}
+
+#[allow(clippy::all)]
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum TimeInForce {
+    Gtc,
+    Ioc,
+    Fok,
+    Gtd,
+    Gtx,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum WorkingType {
+    #[serde(rename = "MARK_PRICE")]
+    MarkPrice,
+    #[serde(rename = "CONTRACT_PRICE")]
+    ContractPrice,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum ResponseType {
+    Ack,
+    Result,
+}
+
+/*
+ * Price Match (priceMatch)
+
+NONE (No price match)
+OPPONENT (counterparty best price)
+OPPONENT_5 (the 5th best price from the counterparty)
+OPPONENT_10 (the 10th best price from the counterparty)
+OPPONENT_20 (the 20th best price from the counterparty)
+QUEUE (the best price on the same side of the order book)
+QUEUE_5 (the 5th best price on the same side of the order book)
+QUEUE_10 (the 10th best price on the same side of the order book)
+QUEUE_20 (the 20th best price on the same side of the order book)
+ */
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "UPPERCASE")]
+pub enum PriceMatch {
+    None,
+    Opponent,
+    #[serde(rename = "OPPONENT_5")]
+    Opponent5,
+    #[serde(rename = "OPPONENT_10")]
+    Opponent10,
+    #[serde(rename = "OPPONENT_20")]
+    Opponent20,
+    Queue,
+    #[serde(rename = "QUEUE_5")]
+    Queue5,
+    #[serde(rename = "QUEUE_10")]
+    Queue10,
+    #[serde(rename = "QUEUE_20")]
+    Queue20,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum SelfTradePreventionMode {
+    #[serde(rename = "EXPIRE_TAKER")]
+    ExpireTaker,
+    #[serde(rename = "EXPIRE_BOTH")]
+    ExpireBoth,
+    #[serde(rename = "EXPIRE_MAKER")]
+    ExpireMaker,
+}

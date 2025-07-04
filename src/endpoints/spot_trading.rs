@@ -1,12 +1,9 @@
-use crate::endpoints::{
-    Endpoint, EndpointRequest, ResponseType, SecurityType,
-};
+use crate::endpoints::{public_enums::*, Endpoint, EndpointRequest, ResponseType, SecurityType};
 use crate::models::*;
 
-use binance_api_macros::{APIRequestInit, APIRequestToString, APIEndPoint};
+use binance_api_macros::{APIEndPoint, APIRequestInit, APIRequestToString};
 
 use serde::{Deserialize, Serialize};
-
 
 #[derive(Debug, APIEndPoint)]
 #[allow(dead_code)]
@@ -34,7 +31,7 @@ pub enum SelfTradePreventionMode {
 pub struct NewOrderRequest {
     pub symbol: String,
     pub side: OrderSide,
-    pub r#type: OrderType,
+    pub r#type: SpotOrderType,
     pub quantity: Option<f64>,
     pub quote_order_qty: Option<f64>,
     pub price: Option<f64>,
@@ -55,7 +52,7 @@ impl EndpointRequest for NewOrderRequest {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub enum OrderType {
+pub enum SpotOrderType {
     #[serde(rename = "LIMIT")]
     Limit,
     #[serde(rename = "MARKET")]
@@ -70,13 +67,6 @@ pub enum OrderType {
     TakeProfitLimit,
     #[serde(rename = "LIMIT_MAKER")]
     LimitMaker,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-#[serde(rename_all = "UPPERCASE")]
-pub enum OrderSide {
-    Buy,
-    Sell,
 }
 
 #[allow(clippy::all)]
