@@ -13,6 +13,8 @@ use strum::Display;
 pub enum FuturesTradingEP {
     #[endpoint(POST, Trade, url = "/fapi/v1/order")]
     Order,
+    #[endpoint(POST, Trade, url = "/fapi/v1/order/test")]
+    OrderTest,
 }
 
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
