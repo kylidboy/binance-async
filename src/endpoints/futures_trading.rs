@@ -15,6 +15,10 @@ pub enum FuturesTradingEP {
     Order,
     #[endpoint(POST, Trade, url = "/fapi/v1/order/test")]
     OrderTest,
+    #[endpoint(POST, Trade, url = "/fapi/v1/leverage")]
+    Leverage,
+    // #[endpoint(GET, UserData)]
+    // OpenOrder,
 }
 
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
@@ -75,7 +79,7 @@ pub struct NewOrderResponse {
     pub client_order_id: String,
     pub cum_qty: String,
     pub cum_quote: String,
-    pub execute_qty: String,
+    pub executed_qty: String,
     pub order_id: u64,
     pub avg_price: String,
     pub orig_qty: String,
@@ -90,7 +94,8 @@ pub struct NewOrderResponse {
     pub time_in_force: String,
     pub r#type: String,
     pub orig_type: String,
-    pub activate_price: String,
+    pub activate_price: Option<String>,
+    pub price_rate: Option<String>,
     pub update_time: u64,
     pub working_type: String,
     pub price_protect: bool,
@@ -98,6 +103,9 @@ pub struct NewOrderResponse {
     pub self_trade_prevention_mode: String,
     pub good_till_date: u64,
 }
+/*
+{"orderId":4052525244,"symbol":"SUIUSDC","status":"NEW","clientOrderId":"L4tpAzg0l78K5gp20HCAWK","price":"0.000000","avgPrice":"0.00","origQty":"3.0","executedQty":"0.0","cumQty":"0.0","cumQuote":"0.0000000","timeInForce":"GTC","type":"MARKET","reduceOnly":false,"closePosition":false,"side":"SELL","positionSide":"BOTH","stopPrice":"0.000000","workingType":"CONTRACT_PRICE","priceProtect":false,"origType":"MARKET","priceMatch":"NONE","selfTradePreventionMode":"EXPIRE_MAKER","goodTillDate":0,"updateTime":1751627587841}
+*/
 
 impl EndpointRequest for NewOrderRequest {
     type Response = NewOrderResponse;
@@ -236,4 +244,25 @@ pub enum SelfTradePreventionMode {
     ExpireBoth,
     #[serde(rename = "EXPIRE_MAKER")]
     ExpireMaker,
+}
+
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
+#[serde(rename_all = "camelCase")]
+pub struct LeverageRequest {
+    pub symbol: String,
+    pub leverage: i32,
+    #[serde(flatten)]
+    pub base: BaseRequest,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct LeverageResponse {
+    pub leverage: i32,
+    pub max_notional_value: String,
+    pub symbol: String,
+}
+
+impl EndpointRequest for LeverageRequest {
+    type Response = LeverageResponse;
 }

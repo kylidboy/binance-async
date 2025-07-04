@@ -7,6 +7,7 @@ pub mod wallet;
 pub mod spot_general;
 pub mod public_enums;
 pub mod futures_trading;
+pub mod futures_market;
 
 pub use http::Method;
 
