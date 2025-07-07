@@ -8,6 +8,7 @@ pub mod spot_general;
 pub mod public_enums;
 pub mod futures_trading;
 pub mod futures_market;
+pub mod futures_account;
 
 pub use http::Method;
 

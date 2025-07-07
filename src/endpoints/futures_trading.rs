@@ -19,6 +19,8 @@ pub enum FuturesTradingEP {
     Leverage,
     #[endpoint(GET, UserData, url = "/fapi/v3/positionRisk")]
     PositionRiskV3,
+    #[endpoint(GET, UserData, url = "/fapi/v1/userTrades")]
+    UserTrades,
 }
 
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
@@ -267,7 +269,6 @@ impl EndpointRequest for LeverageRequest {
     type Response = LeverageResponse;
 }
 
-
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct PositionRiskV3Request {
@@ -306,24 +307,78 @@ pub struct PositionRiskV3 {
 }
 
 /*
- * "symbol": "ADAUSDT",
-        "positionSide": "BOTH",               // 持仓方向
-        "positionAmt": "30",
-        "entryPrice": "0.385",
-        "breakEvenPrice": "0.385077",
-        "markPrice": "0.41047590",
-        "unRealizedProfit": "0.76427700",     // 持仓未实现盈亏
-        "liquidationPrice": "0",
-        "isolatedMargin": "0",
-        "notional": "12.31427700",
-        "marginAsset": "USDT",
-        "isolatedWallet": "0",
-        "initialMargin": "0.61571385",        // 初始保证金
-        "maintMargin": "0.08004280",          // 维持保证金
-        "positionInitialMargin": "0.61571385",// 仓位初始保证金
-        "openOrderInitialMargin": "0",        // 订单初始保证金
-        "adl": 2,
-        "bidNotional": "0",
-        "askNotional": "0",
-        "updateTime": 1720736417660           // 更新时间
- */
+* "symbol": "ADAUSDT",
+       "positionSide": "BOTH",               // 持仓方向
+       "positionAmt": "30",
+       "entryPrice": "0.385",
+       "breakEvenPrice": "0.385077",
+       "markPrice": "0.41047590",
+       "unRealizedProfit": "0.76427700",     // 持仓未实现盈亏
+       "liquidationPrice": "0",
+       "isolatedMargin": "0",
+       "notional": "12.31427700",
+       "marginAsset": "USDT",
+       "isolatedWallet": "0",
+       "initialMargin": "0.61571385",        // 初始保证金
+       "maintMargin": "0.08004280",          // 维持保证金
+       "positionInitialMargin": "0.61571385",// 仓位初始保证金
+       "openOrderInitialMargin": "0",        // 订单初始保证金
+       "adl": 2,
+       "bidNotional": "0",
+       "askNotional": "0",
+       "updateTime": 1720736417660           // 更新时间
+*/
+
+#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
+#[serde(rename_all = "camelCase")]
+pub struct UserTradesRequest {
+    pub symbol: String,
+    pub order_id: Option<u64>,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub from_id: Option<u64>,
+    pub limit: Option<u32>,
+    #[serde(flatten)]
+    pub base: BaseRequest,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct UserTrade {
+    pub buyer: bool,
+    pub commission: String,
+    pub commission_asset: String,
+    pub id: u64,
+    pub maker: bool,
+    pub order_id: u64,
+    pub price: String,
+    pub qty: String,
+    pub quote_qty: String,
+    pub realized_pnl: String,
+    pub side: OrderSide,
+    pub position_side: PositionSide,
+    pub symbol: String,
+    pub time: i64,
+}
+
+impl EndpointRequest for UserTradesRequest {
+    type Response = Vec<UserTrade>;
+
+    fn validate(&self) -> anyhow::Result<()> {
+        if self.end_time.is_some() && self.start_time.is_some() {
+            if self.end_time.unwrap() < self.start_time.unwrap() {
+                anyhow::bail!("start_time must be before end_time")
+            }
+
+            if self.end_time.unwrap() - self.start_time.unwrap() > 87400000 * 7 {
+                anyhow::bail!(
+                    "The time between startTime and endTime cannot be longer than 7 days."
+                )
+            }
+        }
+        if self.limit.is_some() && self.limit.unwrap() > 1000 {
+            anyhow::bail!("limit max 1000")
+        }
+        Ok(())
+    }
+}
