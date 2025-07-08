@@ -39,7 +39,7 @@ pub struct BalanceResponse {
     pub cross_un_pnl: String,
     pub available_balance: String,
     pub max_withdraw_amount: String,
-    pub margin_available: String,
+    pub margin_available: bool,
     pub update_time: i64,
 }
 
