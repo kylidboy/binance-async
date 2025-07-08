@@ -12,7 +12,7 @@ use serde::{Deserialize, Serialize};
 pub enum AccountInfoEP {
     // #[endpoint(GET, UserData, url = "/fapi/v3/account")]
     // AccountInfoV3,
-    #[endpoint(GET, UserData, url = "/fapi/v1/balance")]
+    #[endpoint(GET, UserData, url = "/fapi/v3/balance")]
     Balance,
     #[endpoint(GET, UserData, url = "/fapi/v1/income")]
     IncomeHistory,
