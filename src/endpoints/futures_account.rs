@@ -29,7 +29,7 @@ pub enum AccountInfoEP {
 #[serde(rename_all = "camelCase")]
 pub struct BalanceRequest(pub BaseRequest);
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct BalanceResponse {
     pub account_alias: String,
@@ -60,8 +60,9 @@ pub struct IncomeHistoryRequest {
     pub base: BaseRequest,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub enum IncomeType {
+    #[default]
     #[serde(rename = "TRANSFER")]
     Transfer,
     #[serde(rename = "WELCOME_BONUS")]
@@ -108,7 +109,7 @@ pub enum IncomeType {
     BfusdReward,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct IncomeHistory {
     pub symbol: Option<String>,

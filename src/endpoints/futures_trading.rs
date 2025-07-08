@@ -75,7 +75,7 @@ pub struct NewOrderRequest {
 // "priceMatch": "NONE",              //price match mode
 // "selfTradePreventionMode": "NONE", //self trading preventation mode
 // "goodTillDate": 1693207680000      //order pre-set auot cancel time for TIF GTD order
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct NewOrderResponse {
     pub client_order_id: String,
@@ -145,9 +145,10 @@ impl EndpointRequest for NewOrderRequest {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum PositionSide {
+    #[default]
     Both,
     Long,
     Short,
@@ -162,9 +163,10 @@ STOP/TAKE_PROFIT	quantity, price, stopPrice
 STOP_MARKET/TAKE_PROFIT_MARKET	stopPrice
 TRAILING_STOP_MARKET	callbackRate
  */
-#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy)]
+#[derive(Debug, Display, Serialize, Deserialize, Clone, Copy, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum FutureOrderType {
+    #[default]
     Limit,
     Market,
     Stop,
@@ -179,9 +181,10 @@ pub enum FutureOrderType {
 }
 
 #[allow(clippy::all)]
-#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum TimeInForce {
+    #[default]
     Gtc,
     Ioc,
     Fok,
@@ -189,17 +192,19 @@ pub enum TimeInForce {
     Gtx,
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Default)]
 pub enum WorkingType {
+    #[default]
     #[serde(rename = "MARK_PRICE")]
     MarkPrice,
     #[serde(rename = "CONTRACT_PRICE")]
     ContractPrice,
 }
 
-#[derive(Clone, Copy, Serialize, Deserialize, Debug)]
+#[derive(Clone, Copy, Serialize, Deserialize, Debug, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum ResponseType {
+    #[default]
     Ack,
     Result,
 }
@@ -218,9 +223,10 @@ QUEUE_10 (the 10th best price on the same side of the order book)
 QUEUE_20 (the 20th best price on the same side of the order book)
  */
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Default)]
 #[serde(rename_all = "UPPERCASE")]
 pub enum PriceMatch {
+    #[default]
     None,
     Opponent,
     #[serde(rename = "OPPONENT_5")]
@@ -238,8 +244,9 @@ pub enum PriceMatch {
     Queue20,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Copy)]
+#[derive(Serialize, Deserialize, Debug, Clone, Copy, Default)]
 pub enum SelfTradePreventionMode {
+    #[default]
     #[serde(rename = "EXPIRE_TAKER")]
     ExpireTaker,
     #[serde(rename = "EXPIRE_BOTH")]
@@ -257,7 +264,7 @@ pub struct LeverageRequest {
     pub base: BaseRequest,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct LeverageResponse {
     pub leverage: i32,
@@ -281,7 +288,7 @@ impl EndpointRequest for PositionRiskV3Request {
     type Response = Vec<PositionRiskV3>;
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct PositionRiskV3 {
     pub symbol: String,
@@ -342,7 +349,7 @@ pub struct UserTradesRequest {
     pub base: BaseRequest,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct UserTrade {
     pub buyer: bool,
@@ -378,6 +385,9 @@ impl EndpointRequest for UserTradesRequest {
         }
         if self.limit.is_some() && self.limit.unwrap() > 1000 {
             anyhow::bail!("limit max 1000")
+        }
+        if self.from_id.is_some() && (self.start_time.is_some() || self.end_time.is_some()) {
+            anyhow::bail!("from_id, start_time|end_time can not be used at the same time")
         }
         Ok(())
     }
