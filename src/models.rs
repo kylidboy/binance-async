@@ -241,7 +241,7 @@ pub struct TransactionId {
     pub tran_id: u64,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 #[serde(rename_all = "camelCase")]
 pub struct Transaction {
     pub symbol: String,
@@ -264,6 +264,7 @@ pub struct Transaction {
     #[serde(rename = "type")]
     pub type_name: String,
     pub side: String,
+    #[serde(with = "vec_json_container")]
     pub fills: Option<Vec<FillInfo>>,
 }
 
@@ -1468,6 +1469,27 @@ pub struct CrossMarginFee {
     #[serde(with = "string_or_float")]
     pub borrow_limit: f64,
     pub marginable_pairs: Vec<String>,
+}
+
+pub(crate) mod vec_json_container {
+    use super::FillInfo;
+    use serde::{de, Deserialize, Deserializer, Serialize, Serializer};
+
+    pub fn serialize<T, S>(value: &T, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        T: Serialize,
+        S: Serializer,
+    {
+        serializer.collect_str(&serde_json::to_string(value).unwrap())
+    }
+
+    pub fn deserialize<'de, D>(deserializer: D) -> Result<Option<Vec<FillInfo>>, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Ok(serde_json::from_str(&s).unwrap())
+    }
 }
 
 pub(crate) mod string_or_float {
