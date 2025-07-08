@@ -16,8 +16,6 @@ pub enum AccountInfoEP {
     Balance,
     #[endpoint(GET, UserData, url = "/fapi/v1/income")]
     IncomeHistory,
-    #[endpoint(GET, UserData, url = "/fapi/v1/commissionRate")]
-    CommissionRate,
 }
 
 // #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
@@ -126,19 +124,4 @@ pub struct IncomeHistory {
 
 impl EndpointRequest for IncomeHistoryRequest {
     type Response = Vec<IncomeHistory>;
-}
-
-#[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
-#[serde(rename_all = "camelCase")]
-pub struct CommissionRateRequest {
-    pub symbol: String,
-    pub base: BaseRequest,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct CommissionRateResponse {
-    pub symbol: String,
-    pub maker_commission_rate: String,
-    pub taker_commission_rate: String,
 }
