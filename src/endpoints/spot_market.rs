@@ -76,12 +76,12 @@ pub type Ticker24hResponse = OneOrMany<Either<PriceStatsFull, PriceStatsMini>>;
 #[derive(Debug, Serialize, APIRequestInit, APIRequestToString)]
 #[serde(rename_all = "camelCase")]
 pub struct KlinesRequest {
-    symbol: String,
-    interval: KlineInterval,
-    start_time: Option<u64>,
-    end_time: Option<u64>,
-    time_zone: Option<String>,
-    limit: Option<u16>,
+    pub symbol: String,
+    pub interval: KlineInterval,
+    pub start_time: Option<u64>,
+    pub end_time: Option<u64>,
+    pub time_zone: Option<String>,
+    pub limit: Option<u16>,
 }
 impl EndpointRequest for KlinesRequest {
     type Response = Vec<Vec<Value>>;
