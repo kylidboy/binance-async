@@ -7,16 +7,15 @@ use serde_json::{from_value, Value};
 
 type StdResult<R, E> = std::result::Result<R, E>;
 
-// #[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
-// #[serde(rename_all = "camelCase")]
-// pub struct PartialOrderBookDepthEvent {
-//     pub last_update_id: u64,
-//     pub bids: Vec<PartialOrderBookDepthBid>,
-//     pub asks: Vec<PartialOrderBookDepthAsk>,
-// }
-
-// pub type PartialOrderBookDepthAsk = [String; 2];
-// pub type PartialOrderBookDepthBid = [String; 2];
+pub type PartialOrderBookDepthAsk = [String; 2];
+pub type PartialOrderBookDepthBid = [String; 2];
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq)]
+#[serde(rename_all = "camelCase")]
+pub struct PartialOrderBookDepthEvent {
+    pub last_update_id: u64,
+    pub bids: Vec<PartialOrderBookDepthBid>,
+    pub asks: Vec<PartialOrderBookDepthAsk>,
+}
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "UPPERCASE")]

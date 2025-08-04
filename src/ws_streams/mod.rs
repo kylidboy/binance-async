@@ -21,6 +21,7 @@ use stream_events::BinanceStreamEvent;
 pub enum StreamEvent {
     Ping(i64),
     CombinedStreamPayload(Box<CombinedStreamPayload>),
+    RawStreamPayload(BinanceStreamEvent),
 }
 
 impl TryFrom<&str> for StreamEvent {
@@ -98,6 +99,49 @@ impl RawStream {
     }
 }
 
+impl Stream for RawStream {
+    type Item = BinanceStreamEvent;
+
+    fn poll_next(
+        self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        let s = &mut self.get_mut().connection; // .as_mut().unwrap();
+
+        match s.poll_next_unpin(cx) {
+            Poll::Ready(None) => Poll::Ready(None),
+            Poll::Ready(x) => {
+                let x = x.unwrap();
+                let x = x.unwrap();
+                match x.to_text() {
+                    Ok(msg) => {
+                        let data = match msg.try_into() {
+                            Ok(d) => d,
+                            Err(_) => {
+                                panic!("RawStream payload: {}", msg);
+                            }
+                        };
+                        match data {
+                            StreamEvent::Ping(ts) => {
+                                                        println!("PING from server: {}", ts);
+                                                        Poll::Ready(None)
+                                                    }
+                            StreamEvent::CombinedStreamPayload(_) => { unreachable!() },
+                            StreamEvent::RawStreamPayload(event) => {
+                                Poll::Ready(Some(event))
+                            }
+                        }
+                    }
+                    Err(e) => {
+                        panic!("RawStream payload: {}", e);
+                    }
+                }
+            }
+            Poll::Pending => Poll::Pending,
+        }
+    }
+}
+
 pub struct CombinedStream {
     pub name: Vec<MarketStreams>,
     connection: Option<WssConnection>,
@@ -155,10 +199,13 @@ impl Stream for CombinedStream {
                         };
                         match data {
                             StreamEvent::Ping(ts) => {
-                                println!("PING from server: {}", ts);
-                                Poll::Ready(None)
-                            }
+                                                        println!("PING from server: {}", ts);
+                                                        Poll::Ready(None)
+                                                    }
                             StreamEvent::CombinedStreamPayload(event) => Poll::Ready(Some(*event)),
+                            StreamEvent::RawStreamPayload(_) => {
+                                unreachable!()
+                            }
                         }
                     }
                     Err(e) => {
