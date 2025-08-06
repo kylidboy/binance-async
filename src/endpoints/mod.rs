@@ -9,6 +9,8 @@ pub mod public_enums;
 pub mod futures_trading;
 pub mod futures_market;
 pub mod futures_account;
+pub mod coin_m_futures;
+pub mod usd_m_futures;
 
 pub use http::Method;
 

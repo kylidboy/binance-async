@@ -24,7 +24,7 @@ mod tests {
     use crate::{
         client,
         endpoints::{
-            convert, margin, spot_market, spot_account, wallet, BaseRequest, OneOrManySymbol,
+            convert, margin, spot_account, spot_market, usd_m_futures, wallet, BaseRequest, OneOrManySymbol
         },
         models::*,
         ws_streams::market_streams::{MarketStreams, PartialBookDepthLevel},
@@ -199,6 +199,21 @@ mod tests {
             .access::<margin::IsolatedMarginPairsRequest>(
                 &margin::MarginEP::IsolatedMarginPairs,
                 Some(margin::IsolatedMarginPairsRequest::init()),
+            )
+            .await
+            .unwrap();
+        println!("{:?}", resp);
+    }
+
+    #[tokio::test]
+    async fn usd_m_futures() {
+        let client = client::Client::new(None, None, &MAINNET.futures_rest_api_endpoint);
+        let mut req = usd_m_futures::SymbolPriceTickerRequest::init();
+        req.symbol.replace("SUIUSDC".to_string());
+        let resp = client
+            .access::<usd_m_futures::SymbolPriceTickerRequest>(
+                &usd_m_futures::USD_M_FutureEP::SymbolPriceTicker,
+                Some(req),
             )
             .await
             .unwrap();
