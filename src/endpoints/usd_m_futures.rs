@@ -29,7 +29,8 @@ pub enum USD_M_FutureEP {
     SymbolPriceTicker,
     #[endpoint(GET, MarketData, url = "/fapi/v1/ticker/bookTicker")]
     SymbolOrderBookTicker,
-    // CrossMarginPairs,
+    #[endpoint(POST, Trade, url = "/fapi/v1/leverage")]
+    ChangeInitialLeverage,
     // #[endpoint(GET, UserData, url = "/sapi/v1/margin/crossMarginData")]
     // CrossMarginFeeData,
     // #[endpoint(GET, UserData, url = "/sapi/v1/margin/isolated/allPairs")]
