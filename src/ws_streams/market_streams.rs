@@ -39,7 +39,7 @@ impl Into<String> for &MarketStreams {
                 format!("{}@depth{}@100ms", s.to_lowercase(), l)
             }
             TradeStream(s) => {
-                format!("{}@trade", s.to_uppercase())
+                format!("{}@trade", s.to_lowercase())
             }
         }
     }

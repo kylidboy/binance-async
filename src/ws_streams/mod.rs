@@ -8,7 +8,7 @@ use std::convert::TryFrom;
 use std::ops::{Deref, DerefMut};
 use std::task::Poll;
 use tokio::net::TcpStream;
-use tokio_tungstenite::{connect_async, MaybeTlsStream, WebSocketStream};
+use tokio_tungstenite::{MaybeTlsStream, WebSocketStream, connect_async};
 use url::Url;
 
 use crate::{api_config::ApiConfig, errors::BinanceApiError};
@@ -122,14 +122,11 @@ impl Stream for RawStream {
                             }
                         };
                         match data {
-                            StreamEvent::Ping(ts) => {
-                                                        println!("PING from server: {}", ts);
-                                                        Poll::Ready(None)
-                                                    }
-                            StreamEvent::CombinedStreamPayload(_) => { unreachable!() },
-                            StreamEvent::RawStreamPayload(event) => {
-                                Poll::Ready(Some(event))
+                            StreamEvent::Ping(ts) => Poll::Ready(None),
+                            StreamEvent::CombinedStreamPayload(_) => {
+                                unreachable!()
                             }
+                            StreamEvent::RawStreamPayload(event) => Poll::Ready(Some(event)),
                         }
                     }
                     Err(e) => {
@@ -199,9 +196,8 @@ impl Stream for CombinedStream {
                         };
                         match data {
                             StreamEvent::Ping(ts) => {
-                                                        println!("PING from server: {}", ts);
-                                                        Poll::Ready(None)
-                                                    }
+                                Poll::Ready(None)
+                            }
                             StreamEvent::CombinedStreamPayload(event) => Poll::Ready(Some(*event)),
                             StreamEvent::RawStreamPayload(_) => {
                                 unreachable!()
