@@ -24,16 +24,22 @@ pub enum MarketStreams {
     DiffDepth100ms(String),
     PartialBookDepth1s(String, PartialBookDepthLevel),
     PartialBookDepth100ms(String, PartialBookDepthLevel),
+    TradeStream(String),
 }
 
 impl Into<String> for &MarketStreams {
     fn into(self) -> String {
+        use MarketStreams::*;
+
         match self {
-            MarketStreams::DiffDepth1s(s) => format!("{}@depth", s.to_lowercase()),
-            MarketStreams::DiffDepth100ms(s) => format!("{}@depth@100ms", s.to_lowercase()),
-            MarketStreams::PartialBookDepth1s(s, l) => format!("{}@depth{}", s.to_lowercase(), l),
-            MarketStreams::PartialBookDepth100ms(s, l) => {
+            DiffDepth1s(s) => format!("{}@depth", s.to_lowercase()),
+            DiffDepth100ms(s) => format!("{}@depth@100ms", s.to_lowercase()),
+            PartialBookDepth1s(s, l) => format!("{}@depth{}", s.to_lowercase(), l),
+            PartialBookDepth100ms(s, l) => {
                 format!("{}@depth{}@100ms", s.to_lowercase(), l)
+            }
+            TradeStream(s) => {
+                format!("{}@trade", s.to_uppercase())
             }
         }
     }
