@@ -179,12 +179,24 @@ impl Stream for CombinedStream {
         self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
+        let stream_name = self
+            .name
+            .iter()
+            .map(|v| v.into())
+            .collect::<Vec<String>>()
+            .join("/");
         let s = self.get_mut().connection.as_mut().unwrap();
 
         match s.poll_next_unpin(cx) {
             Poll::Ready(None) => Poll::Ready(None),
             Poll::Ready(x) => {
                 let x = x.unwrap();
+                if x.is_err() {
+                    return Poll::Ready(Some(CombinedStreamPayload {
+                        stream: stream_name,
+                        data: BinanceStreamEvent::Reconnect,
+                    }));
+                }
                 let x = x.unwrap();
                 match x.to_text() {
                     Ok(msg) => {
@@ -195,9 +207,7 @@ impl Stream for CombinedStream {
                             }
                         };
                         match data {
-                            StreamEvent::Ping(ts) => {
-                                Poll::Ready(None)
-                            }
+                            StreamEvent::Ping(ts) => Poll::Ready(None),
                             StreamEvent::CombinedStreamPayload(event) => Poll::Ready(Some(*event)),
                             StreamEvent::RawStreamPayload(_) => {
                                 unreachable!()

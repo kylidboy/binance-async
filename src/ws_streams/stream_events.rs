@@ -22,6 +22,7 @@ pub enum BinanceStreamEvent {
     DepthOrderBook(DepthOrderBookEvent),
     BookTicker(BookTickerEvent),
     // PartialOrderBookDepth(PartialOrderBookDepthEvent),
+    Reconnect,
 }
 
 impl TryFrom<&str> for BinanceStreamEvent {
