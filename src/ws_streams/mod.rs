@@ -118,11 +118,11 @@ impl Stream for RawStream {
                         let data = match msg.try_into() {
                             Ok(d) => d,
                             Err(_) => {
-                                panic!("RawStream payload: {}", msg);
+                                return Poll::Ready(Some(BinanceStreamEvent::Reconnect));
                             }
                         };
                         match data {
-                            StreamEvent::Ping(ts) => Poll::Ready(None),
+                            StreamEvent::Ping(_ts) => Poll::Ready(None),
                             StreamEvent::CombinedStreamPayload(_) => {
                                 unreachable!()
                             }
@@ -203,11 +203,14 @@ impl Stream for CombinedStream {
                         let data = match msg.try_into() {
                             Ok(d) => d,
                             Err(_) => {
-                                panic!("CombinedStream payload: {}", msg);
+                                return Poll::Ready(Some(CombinedStreamPayload {
+                                    stream: stream_name,
+                                    data: BinanceStreamEvent::Reconnect,
+                                }));
                             }
                         };
                         match data {
-                            StreamEvent::Ping(ts) => Poll::Ready(None),
+                            StreamEvent::Ping(_ts) => Poll::Ready(None),
                             StreamEvent::CombinedStreamPayload(event) => Poll::Ready(Some(*event)),
                             StreamEvent::RawStreamPayload(_) => {
                                 unreachable!()
